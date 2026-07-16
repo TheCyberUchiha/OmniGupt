@@ -2,89 +2,59 @@
 
 # 🔒 OmniGupt
 
-**Modern, Browser-Based Cryptography & Encryption Analysis Toolkit**
-
-Encrypt, decrypt, and fingerprint cryptographic data — entirely client-side, entirely in your browser.
+**Modern, browser-based cryptography toolkit — encrypt, decrypt, and analyze, all client-side.**
 
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen?style=for-the-badge)](https://omnigupt.vercel.app/)
 [![GitHub stars](https://img.shields.io/github/stars/TheCyberUchiha/OmniGupt?style=for-the-badge)](https://github.com/TheCyberUchiha/OmniGupt/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/TheCyberUchiha/OmniGupt?style=for-the-badge)](https://github.com/TheCyberUchiha/OmniGupt/network/members)
 [![GitHub last commit](https://img.shields.io/github/last-commit/TheCyberUchiha/OmniGupt?style=for-the-badge)](https://github.com/TheCyberUchiha/OmniGupt/commits/main)
 
-[**🚀 Live App**](https://omnigupt.vercel.app/) · [**🐛 Report Bug**](https://github.com/TheCyberUchiha/OmniGupt/issues) · [**💡 Request Feature**](https://github.com/TheCyberUchiha/OmniGupt/issues)
+[Live App](https://omnigupt.vercel.app/) · [Report Bug](https://github.com/TheCyberUchiha/OmniGupt/issues) · [Request Feature](https://github.com/TheCyberUchiha/OmniGupt/issues)
 
 </div>
 
 ---
 
-## 📖 Table of Contents
+## Why OmniGupt?
 
-- [About](#-about)
-- [Features](#-features)
-- [Supported Cryptographic Tiers](#-supported-cryptographic-tiers)
-- [Security Lab](#-security-lab)
-- [CipherSense — Format Analyzer](#-ciphersense--format-analyzer)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-- [Usage](#-usage)
-- [Running Tests](#-running-tests)
-- [Security & Privacy Model](#-security--privacy-model)
-- [Documentation](#-documentation)
-- [FAQ](#-faq)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Disclaimer](#-disclaimer)
-- [Acknowledgments](#-acknowledgments)
+Most online "encrypt/decrypt" tools are black boxes — you paste text, something happens, you get output. OmniGupt shows the actual mechanics: the key derivation, the IV, the auth tag, the exact algorithm at play. It's built for people who want to *understand* encryption, not just use it — students, developers testing crypto flows, and CTF players fingerprinting unknown data.
+
+Everything runs in your browser. Nothing you type is sent anywhere unless you deliberately run the optional local logging server.
+
+> **Add a demo GIF here** — a 5-second clip of the Tamper Detection Lab catching a tampered byte sells this project better than any paragraph. Drop it in `/assets` and reference it as `![demo](./assets/demo.gif)`.
 
 ---
 
-## 📌 About
+## Features
 
-OmniGupt is a client-side cryptography lab built for students, developers, and security enthusiasts who want to *see* cryptography work instead of just reading about it. It exposes the real parameters most tools hide — key derivation function, iteration counts, IV generation, authentication tags — and pairs them with interactive labs that make abstract crypto properties (like the avalanche effect or authenticated encryption) visible and tangible.
+- **AES-256-GCM encryption** — the recommended default. Authenticated encryption means it doesn't just hide your data, it proves nobody tampered with it.
+- **PBKDF2 key derivation** — 600,000 iterations, unique salt every time, so the same passphrase never produces the same key twice.
+- **CSPRNG key generator** — one click for a truly random passphrase or hex key.
+- **Legacy ciphers on tap** — AES-CBC, DES, 3DES, Rabbit — clearly labeled, kept around so you can see *why* they're considered broken instead of just being told.
+- **Auto-detect on decrypt** — paste ciphertext, OmniGupt figures out the format for you.
+- **Nothing persisted** — secrets live in memory only, gone on refresh.
+- **CipherSense** — paste any unknown string and get a ranked guess of what it is (hash, encoding, ciphertext).
+- **Security Lab** — two interactive demos, described below.
 
-Nothing you type ever leaves your browser unless you explicitly run the optional local logging server yourself — and even then, only non-sensitive metadata is stored.
+## Security Lab
 
-> 💡 **Add a screenshot or GIF here** — a short demo clip of the Encrypt panel or the Tamper Detection Lab in action goes a long way toward making this README pop. Drop it in an `/assets` folder and reference it like:
-> `![OmniGupt demo](./assets/demo.gif)`
+Two small experiments that teach more than a textbook chapter:
 
-## ✨ Features
+- **Tamper Detection Lab** — encrypt something, flip one byte of the ciphertext, watch AES-GCM catch it instantly. This is the whole argument for authenticated encryption in 10 seconds.
+- **Avalanche Effect Visualizer** — change one character of input, measure how much the output changes (Hamming distance). A good cipher should scramble the entire output, not just the part you touched.
 
-| | Feature | Description |
+## Cipher Reference
+
+| Tier | Cipher | Status |
 |---|---|---|
-| 🔐 | **Modern Authenticated Encryption** | AES-256-GCM via the native Web Crypto API, with a fresh random 96-bit IV and a 128-bit auth tag per operation |
-| 🔑 | **Password-Based Key Derivation** | PBKDF2-HMAC-SHA256 with a unique 16-byte salt and 600,000 iterations (OWASP-aligned) |
-| 🎲 | **CSPRNG Key Generator** | True random passphrase / hex key generation via `window.crypto.getRandomValues()` |
-| 🕰️ | **Legacy Cipher Support** | AES-CBC, DES, 3DES, and Rabbit — included for education and retro-compatibility, clearly labeled |
-| 🔍 | **Auto-Detect on Decrypt** | Recognizes versioned GCM payloads vs. legacy Base64 formats automatically |
-| 🚫 | **No Persisted Secrets** | Plaintext, keys, and passphrases live in memory only — never written to disk or a database |
-| 🧪 | **Security Lab** | Interactive Tamper Detection & Avalanche Effect visualizers |
-| 🕵️ | **CipherSense** | Paste any unknown value to get a ranked, explainable format analysis |
+| Recommended | AES-256-GCM | Confidentiality + integrity, native Web Crypto API |
+| Legacy | AES-CBC | Confidentiality only, no tamper detection |
+| Educational | DES | Broken — 56-bit effective key |
+| Educational | Triple DES (3DES) | Deprecated — vulnerable to Sweet32 |
+| Educational | Rabbit | Obsolete stream cipher |
 
-## 🧩 Supported Cryptographic Tiers
+Legacy ciphers run through [CryptoJS](https://github.com/brix/crypto-js); AES-256-GCM and PBKDF2 use the browser's native Web Crypto API directly.
 
-| Tier | Algorithm | Notes |
-|---|---|---|
-| ✅ Modern / Recommended | **AES-256-GCM** | Authenticated encryption — confidentiality *and* integrity, native Web Crypto API |
-| ⚠️ Legacy Compatibility | **AES-CBC** | Confidentiality only, no built-in integrity check |
-| ⚠️ Legacy / Educational | **DES** | Broken — 56-bit effective key length |
-| ⚠️ Legacy / Educational | **Triple DES (3DES)** | Deprecated, vulnerable to Sweet32 collision attacks |
-| ⚠️ Legacy / Educational | **Rabbit** | Obsolete, non-standardized stream cipher |
-
-Legacy ciphers run on [CryptoJS](https://github.com/brix/crypto-js) since the native Web Crypto API doesn't implement them. AES-256-GCM and PBKDF2 use the browser's built-in Web Crypto API directly.
-
-## 🧪 Security Lab
-
-Two hands-on modules that turn abstract crypto theory into something you can watch happen:
-
-- **Tamper Detection Lab** — encrypt a plaintext with AES-GCM, flip a single byte of the ciphertext, and watch authentication fail instantly — a direct, visual reason authenticated encryption beats legacy unauthenticated ciphers.
-- **Avalanche Effect Visualizer** — change one character of input and compare the resulting ciphertexts bit-by-bit via Hamming distance, showing how a tiny input change should cascade into a completely different output.
-
-## 🕵️ CipherSense — Format Analyzer
-
-Paste an unknown hash, encoded string, or ciphertext and get a ranked, explainable guess of what it is — useful for CTFs, security triage, or just building intuition for what different crypto output looks like. Runs 100% locally; nothing is transmitted.
-
-## 🛠️ Tech Stack
+## Tech Stack
 
 <div align="center">
 
@@ -98,24 +68,16 @@ Paste an unknown hash, encoded string, or ciphertext and get a ranked, explainab
 
 </div>
 
-| Layer | Technology |
-|---|---|
-| Core crypto | Native **Web Crypto API** (AES-GCM, PBKDF2) |
-| Legacy ciphers | **CryptoJS** (AES-CBC, DES, 3DES, Rabbit) |
-| Frontend | Vanilla **JavaScript**, **HTML**, **CSS** (glassmorphic UI) |
-| Optional backend | **Python** + **Flask** (audit metadata logging to SQLite) |
-| Unit testing | **Vitest** |
-| End-to-end testing | **Playwright** |
+Frontend is vanilla JS/HTML/CSS — no framework overhead. The optional Flask + SQLite backend only exists for local audit logging. Vitest covers unit tests, Playwright covers end-to-end.
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 OmniGupt/
 ├── index.html                   # Main app UI
-├── index.js                     # App entry logic
-├── index-bundle.js              # Bundled application script
+├── index.js / index-bundle.js   # App logic
 ├── index.css                    # Styles
-├── ciphersense-engine.js        # CipherSense format-detection logic
+├── ciphersense-engine.js        # CipherSense detection logic
 ├── ciphersense-ui.js            # CipherSense UI bindings
 ├── history.html                 # Local audit history viewer
 ├── server.py                    # Optional Flask logging server
@@ -123,143 +85,64 @@ OmniGupt/
 ├── package.json                 # Node scripts & dev dependencies
 ├── playwright.config.js         # E2E test config
 ├── vitest.config.js             # Unit test config
-├── tests/                       # Test suite (unit, security, e2e)
-├── AES_GCM_IMPLEMENTATION.md    # AES-GCM implementation notes
-├── LEGACY_CRYPTO_POLICY.md      # Legacy cipher policy
-├── SECURITY_FIXES.md            # Security fix log
-├── TAMPER_DETECTION_LAB.md      # Tamper Detection Lab notes
-├── AVALANCHE_EFFECT_LAB.md      # Avalanche Effect Lab notes
-├── SECURE_AUDIT_HISTORY.md      # Audit/history logging notes
-└── UI_UX_UPGRADE.md             # UI/UX changelog
+├── tests/                       # Unit, security, e2e test suite
+└── *.md                         # Implementation & policy docs
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
-### Prerequisites
-
-- Any modern browser (Chrome, Firefox, Edge, Safari)
-- [Node.js](https://nodejs.org/) 18+ (only needed for running tests)
-- [Python](https://python.org/) 3.8+ (only needed for the optional logging server)
-
-### Option 1 — Static, zero install (fastest)
+**Requirements:** any modern browser. Node 18+ only if you're running tests. Python 3.8+ only if you want local audit logging.
 
 ```bash
 git clone https://github.com/TheCyberUchiha/OmniGupt.git
 cd OmniGupt
 ```
 
-Open `index.html` directly in your browser (double-click it, or open via `file://`). That's it — no build step, no server required.
+**Fastest path** — just open `index.html` in your browser. No build step, no server.
 
-### Option 2 — With optional local audit logging
-
-If you want operation metadata logged to a local SQLite database:
+**With audit logging** (optional):
 
 ```bash
 pip install -r requirements.txt
 python server.py
 ```
 
-The server starts at `http://localhost:5000/`. OmniGupt auto-detects the backend and logs safe, non-sensitive metadata to it (algorithm, operation type, status, payload size, timestamp — never your actual secrets). View logged history by opening `history.html`.
+Runs at `http://localhost:5000/`. OmniGupt auto-detects it and logs safe metadata only — never your actual secrets. View it in `history.html`.
 
-## 📘 Usage
+## Usage
 
-1. **Encrypt** — choose a cipher (AES-256-GCM recommended), enter a passphrase or generate a random key, paste your plaintext, and hit **Initiate Encryption**.
-2. **Decrypt** — paste your ciphertext into the decrypt panel; OmniGupt auto-detects the format and prompts you for the matching key/passphrase.
-3. **Analyze** — paste any unknown string into **CipherSense** to get a ranked breakdown of likely formats (hash type, encoding, ciphertext shape).
-4. **Explore the Security Lab** — try the Tamper Detection Lab to see authentication failure in action, or the Avalanche Effect Visualizer to see how a one-character change cascades through a cipher.
+1. Pick a cipher (AES-256-GCM by default), enter or generate a key/passphrase, paste your plaintext, hit **Initiate Encryption**.
+2. Paste ciphertext into the decrypt panel — format is auto-detected.
+3. Drop any unknown string into **CipherSense** for a ranked format guess.
+4. Try the **Security Lab** to see tampering get caught, or watch the avalanche effect in action.
 
-## ✅ Running Tests
+## Running Tests
 
 ```bash
 npm install
-
-npm run test:unit      # Vitest unit tests
-npm run test:security  # Static security scan (tests/security-scan.js)
-npm run test:e2e       # Playwright end-to-end tests
-
-npm run test:all       # Run everything
+npm run test:unit      # Vitest
+npm run test:security  # Static security scan
+npm run test:e2e       # Playwright
+npm run test:all       # Everything
 ```
 
-## 🔐 Security & Privacy Model
+## Security Notes
 
-- All cryptographic operations execute **client-side**, in-browser.
-- Plaintext, passphrases, and keys are **never persisted** — memory only, cleared on reload.
-- Only non-sensitive **audit metadata** is optionally logged, and only if you run the local Flask server yourself.
-- Legacy ciphers (DES, 3DES, AES-CBC, Rabbit) are included strictly for **education and retro-compatibility** — not recommended for real, sensitive data. Use AES-256-GCM for that.
-- This is an educational/developer toolkit, not a certified or professionally audited security product. Evaluate your own requirements before using any browser-based tool for production-sensitive data.
+- Everything crypto-related runs client-side. Plaintext, keys, and passphrases are never persisted.
+- Only non-sensitive metadata (algorithm, operation, status, size, timestamp) is ever logged, and only if you opt in by running the local server.
+- Legacy ciphers are for learning, not for protecting anything real — use AES-256-GCM for that.
+- This is an educational/developer tool, not an audited security product. Do your own risk assessment before trusting it with production data.
 
-## 📚 Documentation
+## License
 
-Deeper technical write-ups live alongside the code:
-
-| Doc | Covers |
-|---|---|
-| `AES_GCM_IMPLEMENTATION.md` | AES-GCM implementation details |
-| `LEGACY_CRYPTO_POLICY.md` | Why and how legacy ciphers are handled |
-| `SECURITY_FIXES.md` | History of security-relevant fixes |
-| `TAMPER_DETECTION_LAB.md` | Tamper Detection Lab internals |
-| `AVALANCHE_EFFECT_LAB.md` | Avalanche Effect Visualizer internals |
-| `SECURE_AUDIT_HISTORY.md` | Audit logging design |
-| `UI_UX_UPGRADE.md` | UI/UX changelog |
-
-## ❓ FAQ
-
-<details>
-<summary><b>Is it safe to encrypt real sensitive data with this?</b></summary>
-<br>
-AES-256-GCM here uses the browser's native, standards-compliant Web Crypto API, which is solid. That said, this is an educational/developer tool without a professional security audit — for production-sensitive data, do your own risk assessment first.
-</details>
-
-<details>
-<summary><b>Why include broken ciphers like DES?</b></summary>
-<br>
-Purely for education — seeing DES/3DES/Rabbit fail or behave differently next to AES-256-GCM is a better teacher than a paragraph explaining why they're deprecated. They're clearly labeled and never the default.
-</details>
-
-<details>
-<summary><b>Does OmniGupt work offline?</b></summary>
-<br>
-Yes — once loaded, the core app runs entirely client-side and works from the local filesystem (<code>file://</code>). The optional Flask server for audit logging is the only part that needs anything running locally.
-</details>
-
-<details>
-<summary><b>Do I need to run the Python server?</b></summary>
-<br>
-No — it's entirely optional and only adds local audit-history logging. The core encrypt/decrypt/analyze features work without it.
-</details>
-
-## 🤝 Contributing
-
-Contributions are welcome!
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make your changes and add/update tests where relevant
-4. Run `npm run test:all` before opening a PR
-5. Commit with a clear message and push: `git push origin feature/your-feature`
-6. Open a pull request describing what changed and why
-
-## 📄 License
-
-No license file is currently published in this repository. Until one is added, all rights are reserved by the author by default. If you want this project to be freely reusable, consider adding an [MIT License](https://choosealicense.com/licenses/mit/) — it's the most common choice for educational tools like this one.
-
-## ⚠️ Disclaimer
-
-OmniGupt is provided for educational and developer use. It comes with no warranties, compliance certifications, or professional cryptographic audits. Don't use it to protect real sensitive data in production without your own independent security review.
-
-## 🙏 Acknowledgments
-
-- [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) — native browser cryptography
-- [CryptoJS](https://github.com/brix/crypto-js) — legacy cipher support
-- [Flask](https://flask.palletsprojects.com/) — optional local audit server
-- [Vitest](https://vitest.dev/) & [Playwright](https://playwright.dev/) — testing
+No license file exists in the repo yet — until one's added, all rights are reserved by default. Consider adding [MIT](https://choosealicense.com/licenses/mit/) if you want others to freely build on this.
 
 ---
 
 <div align="center">
 
-Built by [**TheCyberUchiha**](https://github.com/TheCyberUchiha)
+**Created by [The Cyber Uchiha](https://github.com/TheCyberUchiha)**
 
-⭐ If you find this useful, consider starring the repo!
+⭐ Star the repo if OmniGupt was useful to you.
 
 </div>
