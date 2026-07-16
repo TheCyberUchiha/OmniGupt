@@ -6,11 +6,28 @@
  * that cybercore doesn't cover natively.
  */
 
-/* ===== Google Fonts for Cybercore ===== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* ===== CYBERCORE UTILITIES (inlined — formerly from node_modules) ===== */
+/* Box sizing reset */
+*, *::before, *::after { box-sizing: border-box; }
 
 /* ===== App Layout & Coffee Theme ===== */
 :root {
+    /* ── Spacing tokens (formerly from cybercore-css) ── */
+    --space-2xs: 0.25rem;
+    --space-xs:  0.5rem;
+    --space-sm:  0.75rem;
+    --space-md:  1.25rem;
+    --space-lg:  2rem;
+    --space-xl:  3rem;
+
+    /* ── Typography tokens ── */
+    --text-xs:  0.75rem;
+    --text-sm:  0.875rem;
+    --text-base: 1rem;
+    --text-lg:  1.125rem;
+    --text-xl:  1.25rem;
     /* Base OmniGupt overrides - Modern Enterprise */
     --bg-primary: #0F172A;
     --bg-alt: #1E293B;
@@ -55,6 +72,193 @@
     --cyber-green-600: #059669;
 
     --glow-cyan: color-mix(in srgb, var(--cyber-cyan-500) 20%, transparent);
+}
+
+/* ─── Flex utilities ─── */
+.cyber-flex       { display: flex; }
+.cyber-flex-col   { flex-direction: column; }
+.cyber-gap-xs     { gap: var(--space-xs); }
+.cyber-gap-sm     { gap: var(--space-sm); }
+.cyber-gap-md     { gap: var(--space-md); }
+
+/* ─── Spacing utilities ─── */
+.cyber-mt-sm { margin-top: var(--space-sm); }
+.cyber-mt-md { margin-top: var(--space-md); }
+.cyber-mb-md { margin-bottom: var(--space-md); }
+
+/* ─── Form: Input ─── */
+.cyber-input {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.cyber-input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+.cyber-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+/* ─── Form: Textarea ─── */
+.cyber-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 120px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.cyber-textarea:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+.cyber-textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+/* ─── Form: Label ─── */
+.cyber-field__label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--neon-cyan);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* ─── Button base ─── */
+.cyber-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1.1rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    letter-spacing: 0.3px;
+}
+.cyber-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+.cyber-btn:active {
+    transform: scale(0.97);
+}
+
+/* ─── Button sizes ─── */
+.cyber-btn--sm {
+    padding: 0.35rem 0.65rem;
+    font-size: var(--text-xs);
+}
+
+/* ─── Button variants ─── */
+.cyber-btn--green {
+    color: var(--success-green);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+.cyber-btn--green:hover {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: var(--success-green);
+}
+.cyber-btn--green.success-state {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: var(--success-green);
+}
+
+.cyber-btn--cyan {
+    color: var(--neon-cyan);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+.cyber-btn--cyan:hover {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: var(--neon-cyan);
+}
+
+.cyber-btn--ghost {
+    color: var(--text-muted);
+    border-color: transparent;
+    background: transparent;
+}
+.cyber-btn--ghost:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ─── Text color utilities ─── */
+.cyber-text-muted     { color: var(--text-muted); }
+.cyber-text-primary   { color: var(--neon-cyan); }
+.cyber-text-secondary { color: var(--text-muted); }
+.cyber-text-cyan      { color: var(--cyber-cyan-400); }
+.cyber-text-yellow    { color: var(--cyber-yellow-400); }
+.cyber-text-magenta   { color: var(--cyber-magenta-400); }
+
+/* ─── Tab panels ─── */
+.cyber-tabs__panel {
+    display: none;
+}
+.cyber-tabs__panel.active {
+    display: block;
+}
+
+/* ─── Toast notifications ─── */
+.toast-container {
+    position: fixed;
+    top: var(--space-md);
+    right: var(--space-md);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    pointer-events: none;
+}
+.toast {
+    pointer-events: auto;
+    padding: 0.65rem 1.2rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-main);
+    background: rgba(30, 41, 59, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    animation: toast-slide-in 0.3s ease forwards;
+}
+.toast.success { border-left: 3px solid var(--success-green); }
+.toast.error   { border-left: 3px solid var(--warn-magenta); }
+.toast.warning { border-left: 3px solid var(--cyber-yellow-500); }
+.toast.info    { border-left: 3px solid var(--neon-cyan); }
+.toast.fade-out {
+    opacity: 0;
+    transform: translateX(30px);
+}
+@keyframes toast-slide-in {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
 }
 
 body {
