@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniGupt History</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .history-table th, .history-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(0,200,255,0.3); }
+        .history-table th { background: rgba(0,200,255,0.2); font-weight: 600; color: #00d4ff; }
+        .history-table tr:hover { background: rgba(0,200,255,0.1); }
+        .download-btn { padding: 12px 24px; background: linear-gradient(135deg, #00ff88, #00d4ff); color: black; border: none; border-radius: 20px; font-weight: 700; cursor: pointer; }
+        .no-history { text-align: center; color: #888; font-style: italic; padding: 40px; }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="glass-card">
+            <header>
+                <div class="logo">📜 <span>OmniGupt History</span></div>
+                <div class="status-bar">
+                    <span id="statusText">Loading history...</span>
+                    <div class="status-dot"></div>
+                </div>
+            </header>
+            <div id="historyContent">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Recent Operations</h2>
+                    <button class="download-btn" onclick="downloadHistory()">💾 Download Full History</button>
+                </div>
+                <div id="historyTable" class="no-history">No history available (run server.py for logging)</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        async function loadHistory() {
+            try {
+                const res = await fetch('/history?limit=50');
+                const history = await res.json();
+                const container = document.getElementById('historyTable');
+                
+                if (history.length === 0) {
+                    container.innerHTML = '';
+                    const noHistoryDiv = document.createElement('div');
+                    noHistoryDiv.className = 'no-history';
+                    noHistoryDiv.textContent = 'No operations logged yet';
+                    container.appendChild(noHistoryDiv);
+                    return;
+                }
+                
+                // Clear any existing contents
+                container.innerHTML = '';
+                
+                const table = document.createElement('table');
+                table.className = 'history-table';
+                
+                // Create table header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                const headers = ['#', 'Date/Time', 'Operation', 'Method', 'Mode', 'Input Size', 'Output Size', 'Status'];
+                headers.forEach(h => {
+                    const th = document.createElement('th');
+                    th.textContent = h;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Create table body
+                const tbody = document.createElement('tbody');
+                history.forEach((op, i) => {
+                    const row = document.createElement('tr');
+                    
+                    const cellsData = [
+                        (i + 1).toString(),
+                        op.timestamp || '',
+                        (op.operation_type || 'unknown').toUpperCase(),
+                        op.algorithm || '',
+                        (op.mode || '').toUpperCase(),
+                        (op.input_size !== undefined ? op.input_size : 'N/A').toString(),
+                        (op.output_size !== undefined ? op.output_size : 'N/A').toString(),
+                        op.status || 'success'
+                    ];
+                    
+                    cellsData.forEach(text => {
+                        const td = document.createElement('td');
+                        td.textContent = text;
+                        row.appendChild(td);
+                    });
+                    
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+                container.appendChild(table);
+                
+                const statusText = document.getElementById('statusText');
+                if (statusText) {
+                    statusText.textContent = `${history.length} operations loaded`;
+                }
+            } catch(e) {
+                const container = document.getElementById('historyTable');
+                container.innerHTML = '';
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'no-history';
+                errorDiv.textContent = 'Backend not running - Start: python server.py';
+                container.appendChild(errorDiv);
+                
+                const statusText = document.getElementById('statusText');
+                if (statusText) {
+                    statusText.textContent = 'Backend offline';
+                }
+            }
+        }
+
+        async function downloadHistory() {
+            try {
+                const res = await fetch('/download', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({})
+                });
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'omnigupt_history.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch(e) {
+                alert('Download failed - ensure server.py is running');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadHistory);
+        setInterval(loadHistory, 10000);
+    </script>
+</body>
+</html>
+

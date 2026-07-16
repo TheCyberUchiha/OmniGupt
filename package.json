@@ -1,0 +1,23 @@
+{
+  "name": "omnigupt",
+  "version": "2.0.0",
+  "description": "Modern Cryptography & Encryption Analysis Toolkit",
+  "main": "index-bundle.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run && npm run test:security",
+    "test:unit": "vitest run",
+    "test:security": "node tests/security-scan.js",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test:unit && npm run test:security && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "crypto-js": "^4.2.0",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "cybercore-css": "^0.3.0"
+  }
+}

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniGupt</title>
+    <meta name="description" content="OmniGupt - Advanced browser-based cryptographic experimentation and security analysis platform.">
+    <link rel="stylesheet" href="node_modules/cybercore-css/dist/cybercore.min.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <!-- Particle Network Canvas Background -->
+    <canvas id="particle-canvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-2; pointer-events:none;"></canvas>
+
+    <!-- Cyberpunk Background Elements -->
+    <div class="cyber-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="scanner-line"></div>
+
+    <div class="floating-icons">
+        <div class="float-icon" style="top: 10%; left: 15%;">🔒</div>
+        <div class="float-icon" style="top: 25%; right: 20%;">🛡️</div>
+        <div class="float-icon" style="top: 60%; left: 10%;">💻</div>
+        <div class="float-icon" style="top: 70%; right: 15%;">🔑</div>
+        <div class="float-icon" style="top: 40%; left: 85%;">01</div>
+        <div class="float-icon" style="top: 85%; left: 40%;">{}</div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <div class="main-wrapper">
+
+        <!-- ============ HERO SECTION ============ -->
+        <section class="hero-section" id="hero-section" style="display: flex; flex-direction: column; align-items: center;">
+            <div class="sys-init-text" id="sys-text"></div>
+            <div class="hero-subtitle" style="display: block; margin-top: 0; margin-bottom: var(--space-xs); font-size: 0.85rem; color: var(--text-muted);">SECURE. ENCRYPT. VERIFY.</div>
+            <h1 class="hero-title" id="omni-title" style="display: block; margin: 0; padding: 0;">
+                <span class="title-char" style="display: inline-block; transition: transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out;">O</span><span class="title-char" style="display: inline-block; transition: transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out;">M</span><span class="title-char" style="display: inline-block; transition: transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out;">N</span><span class="title-char" style="display: inline-block; transition: transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out;">I</span><span class="title-char" style="display: inline-block; transition: transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out;">G</span><span class="title-char" style="display: inline-block; transition: transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out;">U</span><span class="title-char" style="display: inline-block; transition: transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out;">P</span><span class="title-char" style="display: inline-block; transition: transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out;">T</span>
+            </h1>
+            <p class="hero-desc" style="margin-top: var(--space-sm);">Advanced browser-based cryptographic experimentation and security analysis platform.</p>
+
+            <div class="hero-actions">
+                <button class="btn-cyber" onclick="switchTab('crypto-tool'); document.getElementById('encrypt-input').focus();">ENCRYPT</button>
+                <button class="btn-cyber" onclick="switchTab('crypto-tool'); document.getElementById('decrypt-input').focus();">DECRYPT</button>
+                <button class="btn-cyber" onclick="switchTab('cipher-sense');">CIPHERSENSE</button>
+            </div>
+        </section>
+
+        <!-- Hidden elements kept for JS compatibility -->
+        <div style="display:none;">
+            <small id="mode-indicator"></small>
+            <span id="statusText"></span>
+        </div>
+
+        <!-- ============ TAB 1: CRYPTO TOOL ============ -->
+        <div id="view-crypto-tool" class="cyber-tabs__panel view-section active" role="tabpanel">
+            <div class="cyber-card-module">
+                <div class="card-corner corner-tl"></div>
+                <div class="card-corner corner-tr"></div>
+                <div class="card-corner corner-bl"></div>
+                <div class="card-corner corner-br"></div>
+
+                <div class="module-header">
+                    <div class="module-title">// ENCRYPTION_MODULE</div>
+                    <div class="module-status">● CRYPTO ENGINE READY</div>
+                </div>
+
+                <!-- Key Experience Selection -->
+                <div class="key-section">
+                    <div class="key-mode-container">
+                        <button type="button" class="key-mode-btn active" id="key-mode-passphrase" onclick="setKeyMode('passphrase')">PASSPHRASE</button>
+                        <button type="button" class="key-mode-btn" id="key-mode-raw" onclick="setKeyMode('raw')">RAW KEY</button>
+                    </div>
+
+                    <div class="cyber-flex cyber-flex-col cyber-gap-xs">
+                        <label for="secret-key" id="key-input-label" class="cyber-field__label">Passphrase</label>
+                        <div class="key-input-wrapper">
+                            <input type="password" id="secret-key" class="cyber-input" autocomplete="off" placeholder="Enter passphrase..." />
+                            <button type="button" class="cyber-btn cyber-btn--sm" onclick="toggleKeyView()" aria-label="Toggle Secret Key Visibility">👁</button>
+                            <button type="button" class="cyber-btn cyber-btn--sm" id="key-gen-btn" onclick="genKey()" aria-label="Generate Secret Key" style="display: none;">GEN</button>
+                        </div>
+                    </div>
+
+                    <!-- Raw IV Input -->
+                    <div id="iv-section" style="display: none; margin-top: var(--space-sm);">
+                        <div class="cyber-flex cyber-flex-col cyber-gap-xs" style="width: 100%;">
+                            <label for="iv-input" class="cyber-field__label">Initialization Vector (IV)</label>
+                            <input type="text" id="iv-input" class="cyber-input" placeholder="IV (32 hex chars, optional)" maxlength="32" aria-label="Initialization Vector (IV)" />
+                            <small class="cyber-text-muted" style="font-size: var(--text-xs);">For raw AES CBC (auto zero if empty)</small>
+                        </div>
+                    </div>
+
+                    <div class="strength-bar">
+                        <div class="bar-fill" id="barFill"></div>
+                    </div>
+                    <div class="strength-label-row">
+                        <span id="strengthText">AWAITING PASSPHRASE</span>
+                        <span id="strengthHint"></span>
+                    </div>
+                </div>
+
+                <!-- Method Selector Card Grid -> Cipher Rail -->
+                <div class="cipher-section-label">&gt; SELECT_CIPHER</div>
+                <div class="cipher-rail-grid" role="tablist" aria-label="Algorithm Selection">
+                    <button type="button" class="cipher-rail-item method-btn-card active" data-method="AES-GCM" role="tab" aria-selected="true" id="algo-btn-aes-gcm">
+                        <span class="cipher-rail-item-title">AES-256-GCM</span>
+                        <span class="cipher-rail-item-status recommended">● RECOMMENDED</span>
+                    </button>
+                    <button type="button" class="cipher-rail-item method-btn-card" data-method="AES" role="tab" aria-selected="false" id="algo-btn-aes-cbc">
+                        <span class="cipher-rail-item-title">AES-CBC</span>
+                        <span class="cipher-rail-item-status legacy">△ LEGACY</span>
+                    </button>
+                    <button type="button" class="cipher-rail-item method-btn-card" data-method="DES" role="tab" aria-selected="false" id="algo-btn-des">
+                        <span class="cipher-rail-item-title">DES</span>
+                        <span class="cipher-rail-item-status legacy">△ LEGACY</span>
+                    </button>
+                    <button type="button" class="cipher-rail-item method-btn-card" data-method="TripleDES" role="tab" aria-selected="false" id="algo-btn-3des">
+                        <span class="cipher-rail-item-title">3DES</span>
+                        <span class="cipher-rail-item-status deprecated">× DEPRECATED</span>
+                    </button>
+                    <button type="button" class="cipher-rail-item method-btn-card" data-method="Rabbit" role="tab" aria-selected="false" id="algo-btn-rabbit">
+                        <span class="cipher-rail-item-title">RABBIT</span>
+                        <span class="cipher-rail-item-status educational">◇ EDUCATIONAL</span>
+                    </button>
+                </div>
+                <!-- Advanced Settings Section -->
+                <details class="advanced-settings-details" id="key-advanced-details">
+                    <summary>ADVANCED CRYPTOGRAPHIC PARAMETERS</summary>
+                    <div class="advanced-settings-grid">
+                        <div>Selected Algorithm: <strong class="cyber-text-primary" id="adv-algo">AES-256-GCM</strong></div>
+                        <div>Target Key Size: <strong class="cyber-text-primary" id="adv-keysize">256 bits</strong></div>
+                        <div>Cipher Block Mode: <strong class="cyber-text-primary" id="adv-mode">GCM (Galois/Counter Mode)</strong></div>
+                        <div>Key Derivation Function: <strong class="cyber-text-primary" id="adv-kdf">PBKDF2-HMAC-SHA256</strong></div>
+                        <div>PBKDF2 Hash Iterations: <strong class="cyber-text-primary" id="adv-iterations">600,000</strong></div>
+                        <div>Output Payload Version: <strong class="cyber-text-primary" id="adv-version">1</strong></div>
+                    </div>
+                </details>
+
+                <!-- Dual Panels -->
+                <div class="dual-panels cyber-mt-md">
+                    <div class="panel" data-tilt data-tilt-glare data-tilt-max-glare="0.15" data-tilt-max="3" data-tilt-speed="400">
+                        <label for="encrypt-input" style="display:block; margin-bottom:var(--space-sm); color:var(--neon-cyan); font-family:var(--font-mono); font-size:var(--text-sm); font-weight:700;">PLAINTEXT_INPUT</label>
+                        <textarea id="encrypt-input" class="cyber-textarea" placeholder="Your plain text goes here... (large area)"></textarea>
+
+                        <div id="crypto-cube-wrap" class="crypto-cube-container">
+                            <div class="crypto-cube">
+                                <div class="cube-face front">ENC</div>
+                                <div class="cube-face right">AES</div>
+                                <div class="cube-face back">GCM</div>
+                                <div class="cube-face left">256</div>
+                                <div class="cube-face top">SEC</div>
+                                <div class="cube-face bottom">KDF</div>
+                            </div>
+                        </div>
+
+                        <div id="terminal-encrypt-log" class="terminal-log cyber-mt-sm"></div>
+
+                        <button type="button" id="encrypt-btn" class="btn-cyber" style="width: 100%; margin-top: var(--space-sm);" onclick="handleEncrypt()">INITIATE ENCRYPTION</button>
+                    </div>
+                    <div class="panel" data-tilt data-tilt-glare data-tilt-max-glare="0.15" data-tilt-max="3" data-tilt-speed="400">
+                        <label for="decrypt-input" style="display:block; margin-bottom:var(--space-sm); color:var(--neon-cyan); font-family:var(--font-mono); font-size:var(--text-sm); font-weight:700;">DECRYPT_INPUT <small class="cyber-text-muted">(Auto-detects format)</small></label>
+                        <textarea id="decrypt-input" class="cyber-textarea" placeholder="Paste ciphertext (CryptoJS/base64/hex)...&#10;Raw AES will auto-try with zero IV"></textarea>
+                        <button type="button" id="decrypt-btn" class="btn-cyber" style="width: 100%; margin-top: var(--space-sm);" onclick="window.decryptText()">DECRYPT DATA</button>
+                    </div>
+                </div>
+
+                <!-- Result with Metadata Log -->
+                <div class="result-section" data-tilt data-tilt-glare data-tilt-max-glare="0.15" data-tilt-max="2" data-tilt-speed="400">
+                    <div class="result-header">
+                        <div class="result-header-left">RESULT OUTPUT</div>
+                        <div class="result-status ready" id="result-status-badge">READY</div>
+                    </div>
+                    <textarea readonly id="result-area" class="cyber-textarea" placeholder="AWAITING CRYPTOGRAPHIC OPERATION&#10;&#10;&gt; Select algorithm&#10;&gt; Configure key material&#10;&gt; Provide input data&#10;&gt; Execute encryption or decryption"></textarea>
+                    <p class="cyber-text-muted" style="font-size: var(--text-xs); margin-top: var(--space-2xs); margin-bottom: var(--space-xs); font-style: italic;">
+                        OmniGupt stores operation metadata only. Secret keys, passphrases, plaintext, and encrypted content are not saved.
+                    </p>
+                    <div class="result-actions">
+                        <button type="button" class="cyber-btn cyber-btn--green" onclick="copyResult()">COPY RESULT</button>
+                        <button type="button" class="cyber-btn cyber-btn--cyan" onclick="downloadThisOperation()">DOWNLOAD RESULT</button>
+                        <button type="button" class="cyber-btn cyber-btn--ghost" onclick="clearAll()">CLEAR ALL</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ TAB: CIPHERSENSE ============ -->
+        <div id="view-cipher-sense" class="cyber-tabs__panel view-section" style="display:none;" role="tabpanel" aria-label="CipherSense Crypto Format Analyzer">
+            <div class="cyber-card-module">
+                <div class="card-corner corner-tl"></div>
+                <div class="card-corner corner-tr"></div>
+                <div class="card-corner corner-bl"></div>
+                <div class="card-corner corner-br"></div>
+
+                <div class="module-header">
+                    <div class="module-title">// CIPHERSENSE : CRYPTO FORMAT ANALYZER</div>
+                    <div class="module-status">● LOCAL ENGINE READY</div>
+                </div>
+
+                <div class="cs-privacy-banner" role="note">
+                    <span class="cs-privacy-icon">🔒</span>
+                    <span>Analysis runs locally in your browser. OmniGupt does not transmit or store the analyzed value.</span>
+                </div>
+
+                <div class="cs-page-header">
+                    <h2 class="cs-title">CipherSense</h2>
+                    <p class="cs-subtitle">Crypto Format Analyzer</p>
+                    <p class="cs-desc">Analyze unknown hashes, encodings, cryptographic formats, and ciphertext characteristics locally in your browser. Paste any suspicious value to get a ranked, explainable analysis.</p>
+                </div>
+
+                <div class="cs-input-panel">
+                    <label for="cs-input" class="cs-field-label">Unknown Value</label>
+                    <textarea id="cs-input" class="cyber-textarea cs-main-textarea" placeholder="Paste a hash, encoded value, token, ciphertext, or password hash..." rows="5" aria-label="Unknown cryptographic value to analyze" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+                    <div class="cs-btn-row">
+                        <button class="btn-cyber" id="cs-analyze-btn" onclick="cs_triggerAnalysis()" aria-label="Analyze input">[ ANALYZE ]</button>
+                        <button class="cyber-btn" onclick="cs_clearAll()" aria-label="Clear input and results">Clear</button>
+                        <button class="cyber-btn" onclick="cs_pasteFromClipboard()" aria-label="Paste from clipboard">Paste</button>
+                    </div>
+                </div>
+
+                <div id="cs-analysis-section" hidden>
+                    <div class="cs-section">
+                        <div class="cs-section-title">Input Analysis</div>
+                        <div id="cs-summary" class="cs-summary-card"></div>
+                    </div>
+                    <div class="cs-section">
+                        <div class="cs-section-title">
+                            Possible Formats
+                            <span class="cs-section-note" id="cs-confidence-tooltip">
+                                Ranked by confidence score
+                                <button class="cs-tooltip-btn" onclick="cs_showConfidenceInfo()" aria-label="About confidence scores">i</button>
+                            </span>
+                        </div>
+                        <div id="cs-results"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-about" class="cyber-tabs__panel view-section" style="display: none;" role="tabpanel">
+            <div class="cyber-card-module about-card">
+                <div class="card-corner corner-tl"></div>
+                <div class="card-corner corner-tr"></div>
+                <div class="card-corner corner-bl"></div>
+                <div class="card-corner corner-br"></div>
+
+                <div class="module-header">
+                    <div class="module-title">// DOCS : ABOUT &amp; SECURITY</div>
+                    <div class="module-status">● VERIFIED</div>
+                </div>
+                <p class="cyber-text-secondary cyber-mb-md" style="font-size: var(--text-sm); line-height: 1.6;">
+                    OmniGupt is a client-side modern cryptography laboratory and encryption analysis toolkit designed for developers, learners, and security analysts.
+                </p>
+
+                <div class="cyber-flex cyber-flex-col cyber-gap-md cyber-mt-md">
+                    <div class="info-section">
+                        <h3 class="cyber-text-cyan">Privacy Model</h3>
+                        <p>All cryptographic operations are performed client-side in the browser. OmniGupt does not intentionally persist secret keys, passphrases, or plaintext messages. The required CryptoJS library is loaded securely via a public CDN. Operational audit metadata is saved locally to browser storage, and optionally logged to server.py if the local Python server is running.</p>
+                    </div>
+                    <div class="info-section">
+                        <h3 class="cyber-text-yellow">Legacy Algorithms Policy</h3>
+                        <p>Legacy algorithms (DES, Triple DES, Rabbit) are included strictly for educational analysis and retro-compatibility. They are not recommended for protecting modern sensitive data. AES-256-GCM is recommended for all new encryption operations due to its modern authenticated encryption features.</p>
+                    </div>
+                    <div class="info-section">
+                        <h3 class="cyber-text-magenta">Security Limitations</h3>
+                        <p>OmniGupt is an educational and developer cryptography toolkit. Users should evaluate security requirements before using browser-based tools for highly sensitive production data. The tool is provided without warranties, compliance certificates, or professional cryptographic audits.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ===== PARTICLE NETWORK BACKGROUND ===== -->
+    <script>
+    (function () {
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const CONFIG = {
+            count: 90,
+            maxDist: 150,
+            hoverDist: 180,
+            hoverLineDist: 220,
+            speed: 0.15,
+            dotRadius: 1.2,
+            dotColor:       'rgba(201, 139, 95, ',
+            lineColor:      'rgba(201, 139, 95, ',
+            hoverDotColor:  'rgba(59, 130, 246, ',
+            hoverLineColor: 'rgba(59, 130, 246, ',
+        };
+
+        let W, H, particles = [];
+        let mouse = { x: -9999, y: -9999 };
+
+        function resize() {
+            W = canvas.width  = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor(cx, cy, cw, ch) { 
+                this.cx = cx; this.cy = cy; this.cw = cw; this.ch = ch;
+                this.reset(); 
+            }
+            reset() {
+                if (this.cw !== undefined) {
+                    this.x = this.cx + Math.random() * this.cw;
+                    this.y = this.cy + Math.random() * this.ch;
+                } else {
+                    this.x = Math.random() * W;
+                    this.y = Math.random() * H;
+                }
+                this.vx = (Math.random() - 0.5) * CONFIG.speed * 2;
+                this.vy = (Math.random() - 0.5) * CONFIG.speed * 2;
+                this.baseR = CONFIG.dotRadius + Math.random() * 0.4;
+                this.r = this.baseR;
+            }
+            update() {
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < CONFIG.hoverDist && dist > 1) {
+                    const force = (CONFIG.hoverDist - dist) / CONFIG.hoverDist;
+                    this.vx += (dx / dist) * force * 0.02;
+                    this.vy += (dy / dist) * force * 0.02;
+                }
+                const spd = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                const maxSpd = CONFIG.speed * 3.0;
+                if (spd > maxSpd) { this.vx = (this.vx / spd) * maxSpd; this.vy = (this.vy / spd) * maxSpd; }
+                this.vx *= 0.994;
+                this.vy *= 0.994;
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < -30) this.x = W + 30;
+                if (this.x > W + 30) this.x = -30;
+                if (this.y < -30) this.y = H + 30;
+                if (this.y > H + 30) this.y = -30;
+                
+                // Subtle scale max to ~1.6px
+                const nearMouse = dist < CONFIG.hoverDist;
+                const targetR = nearMouse ? this.baseR * 1.5 : this.baseR;
+                this.r += (targetR - this.r) * 0.1;
+            }
+            draw() {
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distM = Math.sqrt(dx * dx + dy * dy);
+                const nearMouse = distM < CONFIG.hoverDist;
+                
+                if (nearMouse) {
+                    const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 2.5);
+                    grd.addColorStop(0, CONFIG.hoverDotColor + '0.2)');
+                    grd.addColorStop(1, CONFIG.hoverDotColor + '0)');
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.r * 2.5, 0, Math.PI * 2);
+                    ctx.fillStyle = grd;
+                    ctx.fill();
+                }
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fillStyle = nearMouse ? CONFIG.hoverDotColor + '0.85)' : CONFIG.dotColor + '0.75)';
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            resize();
+            particles = [];
+            
+            // Adaptive particle count based on screen width
+            let targetCount = CONFIG.count;
+            if (W < 768) targetCount = Math.floor(CONFIG.count * 0.6);
+            else if (W > 1600) targetCount = Math.floor(CONFIG.count * 1.5);
+            else if (W > 1200) targetCount = Math.floor(CONFIG.count * 1.3);
+            
+            // Spatial distribution grid to prevent dead zones
+            const cols = 4;
+            const rows = 3;
+            const perCell = Math.ceil(targetCount / (cols * rows));
+            const cellW = W / cols;
+            const cellH = H / rows;
+            
+            for (let c = 0; c < cols; c++) {
+                for (let r = 0; r < rows; r++) {
+                    for (let i = 0; i < perCell; i++) {
+                        if (particles.length >= targetCount) break;
+                        const p = new Particle(c * cellW, r * cellH, cellW, cellH);
+                        particles.push(p);
+                    }
+                }
+            }
+        }
+
+        function drawLinks() {
+            for (let i = 0; i < particles.length; i++) {
+                const a = particles[i];
+                const mdx = mouse.x - a.x;
+                const mdy = mouse.y - a.y;
+                const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+                
+                if (mdist < CONFIG.hoverLineDist) {
+                    const alpha = (1 - mdist / CONFIG.hoverLineDist) * 0.45;
+                    ctx.save();
+                    ctx.strokeStyle = CONFIG.hoverLineColor + alpha + ')';
+                    ctx.lineWidth = 0.8; // thinner
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+                
+                for (let j = i + 1; j < particles.length; j++) {
+                    const b = particles[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < CONFIG.maxDist) {
+                        const alpha = (1 - dist / CONFIG.maxDist) * 0.2;
+                        ctx.beginPath();
+                        ctx.strokeStyle = CONFIG.lineColor + alpha + ')';
+                        ctx.lineWidth = 0.5; // very thin
+                        ctx.moveTo(a.x, a.y);
+                        ctx.lineTo(b.x, b.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, W, H);
+            drawLinks();
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+        init();
+        animate();
+    })();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="index-bundle.js"></script>
+    <script src="ciphersense-engine.js"></script>
+    <script src="ciphersense-ui.js"></script>
+    <script>
+        window.updateResultStatus = function(status) {
+            const badge = document.getElementById('result-status-badge');
+            if(!badge) return;
+            badge.className = 'result-status ' + (status === 'READY' ? 'ready' : (status === 'error' || status === 'ERROR' ? 'error' : 'success'));
+            badge.innerText = status;
+        };
+
+        window.copyResult = function() {
+            const res = document.getElementById('result-area').value;
+            if(!res) return;
+            navigator.clipboard.writeText(res);
+            const btn = event.currentTarget || document.querySelector('.cyber-btn--green');
+            if (!btn) return;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'COPIED';
+            btn.classList.add('success-state');
+            setTimeout(() => { btn.innerHTML = originalText; btn.classList.remove('success-state'); }, 1500);
+        };
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const text = "[ SYSTEM // OMNIGUPT INITIALIZED ]";
+            let index = 0;
+            const target = document.getElementById("sys-text");
+            function typeChar() {
+                if (index < text.length) { target.textContent += text.charAt(index); index++; setTimeout(typeChar, 30); }
+            }
+            setTimeout(typeChar, 300);
+
+            setInterval(() => {
+                const title = document.querySelector(".hero-title");
+                if (title && Math.random() > 0.7) { title.classList.add("glitch-active"); setTimeout(() => title.classList.remove("glitch-active"), 150); }
+            }, 2000);
+
+            const obs = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('reveal'); });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.cyber-card-module').forEach(card => obs.observe(card));
+        });
+
+        window.handleEncrypt = function () {
+            if (typeof window.encryptText === 'function') window.encryptText();
+            const terminal = document.getElementById('terminal-encrypt-log');
+            if (terminal) {
+                terminal.style.display = 'block';
+                terminal.innerHTML = '';
+                const sequence = ['> GENERATING KEY MATERIAL...','> INITIALIZING AES-256-GCM...','> ENCRYPTING DATA...','> VERIFYING AUTHENTICATION TAG...','> ENCRYPTION COMPLETE'];
+                (async () => {
+                    const cube = document.getElementById('crypto-cube-wrap');
+                    if (cube) cube.classList.add('active');
+                    for (let i = 0; i < sequence.length; i++) { terminal.innerHTML += sequence[i] + '<br>'; await new Promise(r => setTimeout(r, 200)); }
+                    if (cube) cube.classList.remove('active');
+                })();
+            }
+        };
+
+        const originalSwitchTab = window.switchTab;
+        if (typeof originalSwitchTab === 'function') {
+            window.switchTab = function (tabId) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+                originalSwitchTab(tabId);
+                const targetPanel = document.getElementById('view-' + tabId);
+                if (targetPanel) targetPanel.classList.add('active');
+            };
+        }
+
+        // --- OmniGupt Letter Hover Animation ---
+        const omniTitle = document.getElementById('omni-title');
+        const chars = document.querySelectorAll('.title-char');
+        if (omniTitle && chars.length > 0) {
+            omniTitle.addEventListener('mousemove', (e) => {
+                const mouseX = e.clientX;
+                chars.forEach((char) => {
+                    const charRect = char.getBoundingClientRect();
+                    const charCenter = charRect.left + charRect.width / 2;
+                    const dist = Math.abs(mouseX - charCenter);
+                    
+                    // Interaction radius of 70px
+                    const effect = Math.max(0, 1 - (dist / 70));
+                    
+                    // Subtle scale and transform
+                    const scale = 1 + (effect * 0.12);
+                    const translateY = -(effect * 2);
+                    
+                    char.style.transform = `scale(${scale}) translateY(${translateY}px)`;
+                    
+                    // Subtle cyan color tint
+                    if (effect > 0.4) {
+                        char.style.color = '#60A5FA'; // electric blue
+                        char.style.textShadow = `0 0 ${effect * 5}px rgba(59, 130, 246, ${effect * 0.4})`;
+                    } else {
+                        char.style.color = 'inherit';
+                        char.style.textShadow = 'none';
+                    }
+                });
+            });
+            
+            omniTitle.addEventListener('mouseleave', () => {
+                chars.forEach(char => {
+                    char.style.transform = 'scale(1) translateY(0)';
+                    char.style.color = 'inherit';
+                    char.style.textShadow = 'none';
+                });
+            });
+        }
+
+        // --- Button Cryptographic Scramble Effect ---
+        const cyberButtons = document.querySelectorAll('.btn-cyber');
+        const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+-/<>?';
+        cyberButtons.forEach(btn => {
+            // Safe storage of original text
+            btn.dataset.originalText = btn.innerText;
+            btn.addEventListener('mouseenter', function() {
+                if (this.scrambleInterval) clearInterval(this.scrambleInterval);
+                const original = this.dataset.originalText;
+                let iteration = 0;
+                
+                this.scrambleInterval = setInterval(() => {
+                    this.innerText = original.split('').map((char, index) => {
+                        if (char === ' ') return ' ';
+                        if (index < iteration) return char;
+                        return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+                    }).join('');
+                    
+                    if (iteration >= original.length) {
+                        clearInterval(this.scrambleInterval);
+                        this.innerText = original;
+                    }
+                    iteration += 1/3;
+                }, 30);
+            });
+            
+            // Ensure fallback text restore on leave to catch any edge cases, though not required to run reverse anim.
+            btn.addEventListener('mouseleave', function() {
+                if (this.scrambleInterval) clearInterval(this.scrambleInterval);
+                this.innerText = this.dataset.originalText;
+            });
+        });
+
+        const cipherItems = document.querySelectorAll('.cipher-rail-item');
+        if (cipherItems.length > 0) {
+            cipherItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const method = item.dataset.method;
+                    cipherItems.forEach(btn => btn.classList.remove('active'));
+                    item.classList.add('active');
+                });
+            });
+        }
+
+    </script>
+    <!-- 3D Interactions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+</body>
+
+</html>
